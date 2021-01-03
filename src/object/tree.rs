@@ -4,12 +4,6 @@ pub struct Tree {
     pub contents: Vec<File>,
 }
 
-pub struct File {
-    pub mode: usize,
-    pub name: String,
-    pub hash: Vec<u8>,
-}
-
 impl Tree {
     pub fn from(bytes: &[u8]) -> Option<Self> {
         let contents: Vec<File> = Vec::new();
@@ -34,6 +28,12 @@ impl Tree {
 
         [header.as_bytes(), content.as_slice()].concat()
     }
+}
+
+pub struct File {
+    pub mode: usize,
+    pub name: String,
+    pub hash: Vec<u8>,
 }
 
 impl File {
