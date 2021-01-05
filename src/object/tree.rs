@@ -1,4 +1,5 @@
 use super::ObjectType;
+use std::fmt;
 
 pub struct Tree {
     pub contents: Vec<File>,
@@ -27,6 +28,20 @@ impl Tree {
         let header = format!("{} {}\0", ObjectType::Tree.to_string(), content.len());
 
         [header.as_bytes(), content.as_slice()].concat()
+    }
+}
+
+impl fmt::Display for Tree {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "{}",
+            (&self.contents)
+                .into_iter()
+                .map(|f| format!("{}", f))
+                .collect::<Vec<_>>()
+                .join("\n")
+        )
     }
 }
 
@@ -59,6 +74,18 @@ impl File {
     pub fn encode(&self) -> Vec<u8> {
         let header = format!("{} {}\0", self.mode, self.name);
         [header.as_bytes(), &self.hash].concat()
+    }
+}
+
+impl fmt::Display for File {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "{:>06} ??? {}\t{}",
+            self.mode,
+            hex::encode(&self.hash),
+            self.name
+        )
     }
 }
 
@@ -106,6 +133,18 @@ mod tests {
     }
 
     #[test]
+    fn file_to_string() {
+        let mode = 040000;
+        let name = String::from("test.txt");
+        let hash = b"aaaaaaaaaaaaaaaaaaaa";
+        let f = File::new(mode, name.clone(), hash);
+        assert_eq!(
+            f.to_string(),
+            format!("{:>06} ??? {}\t{}", mode, hex::encode(&hash), name)
+        );
+    }
+
+    #[test]
     fn tree_from() {
         let ot = Tree::from(b"");
         assert!(ot.is_some());
@@ -144,6 +183,22 @@ mod tests {
                 content.as_slice(),
             ]
             .concat()
+        );
+    }
+
+    #[test]
+    fn tree_to_string() {
+        let mode = 040000;
+        let name = String::from("test.txt");
+        let hash = b"aaaaaaaaaaaaaaaaaaaa";
+        let t = Tree::from(
+            b"040000 test.txt\0aaaaaaaaaaaaaaaaaaaa040000 test.txt\0aaaaaaaaaaaaaaaaaaaa",
+        )
+        .unwrap();
+        assert_eq!(
+            t.to_string(),
+            format!("{:>06} ??? {}\t{}", mode, hex::encode(&hash), name)
+                + &format!("\n{:>06} ??? {}\t{}", mode, hex::encode(&hash), name)
         );
     }
 }
