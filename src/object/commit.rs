@@ -2,6 +2,7 @@ use super::ObjectType;
 use chrono::{DateTime, FixedOffset, TimeZone, Utc};
 use std::fmt;
 
+#[derive(Debug)]
 pub struct Commit {
     pub tree: String,
     pub parent: Option<String>,
@@ -62,7 +63,7 @@ impl Commit {
             Err(v) => Some(v.clone()),                  // Err ならその値を使う
         }
         .map(|x| {
-            x.splitn(2, |&x| x != b' ')
+            x.splitn(2, |&x| x == b' ')
                 .skip(1)
                 .flatten()
                 .map(|&x| x)
@@ -73,7 +74,7 @@ impl Commit {
         let comitter = iter
             .next()
             .map(|x| {
-                x.splitn(2, |&x| x != b' ')
+                x.splitn(2, |&x| x == b' ')
                     .skip(1)
                     .flatten()
                     .map(|&x| x)
@@ -123,6 +124,7 @@ impl fmt::Display for Commit {
     }
 }
 
+#[derive(Debug)]
 pub struct User {
     pub name: String,
     pub email: String,
@@ -232,5 +234,44 @@ mod tests {
         assert!(ou.is_some());
         let u = ou.unwrap();
         assert_eq!(u.ts, ts);
+    }
+
+    #[test]
+    fn commit_from() {
+        let oc = Commit::from(b"");
+        assert!(oc.is_none());
+
+        // first commit
+        let cs = vec![
+            "tree 38b38f11af50240a2ddf643619e065408211e9e9",
+            "author author <author@example.com> 1609642799 +0900",
+            "comitter comitter <comitter@example.com> 1609642799 +0900",
+            "",
+            "first commit",
+        ]
+        .join("\n");
+        let oc = Commit::from(cs.as_bytes());
+        assert!(oc.is_some());
+        let c = oc.unwrap();
+        assert_eq!(c.tree, "38b38f11af50240a2ddf643619e065408211e9e9");
+        assert!(c.parent.is_none());
+
+        let ts = DateTime::parse_from_rfc3339("2021-01-03T11:59:59+09:00").unwrap();
+        let author = User::new(
+            String::from("author"),
+            String::from("author@example.com"),
+            FixedOffset::west(0).from_utc_datetime(&ts.naive_utc()),
+        );
+        let comitter = User::new(
+            String::from("comitter"),
+            String::from("comitter@example.com"),
+            FixedOffset::west(0).from_utc_datetime(&ts.naive_utc()),
+        );
+        assert_eq!(c.author.name, author.name);
+        assert_eq!(c.author.email, author.email);
+        assert_eq!(c.author.ts, author.ts);
+        assert_eq!(c.comitter.name, comitter.name);
+        assert_eq!(c.comitter.email, comitter.email);
+        assert_eq!(c.comitter.ts, comitter.ts);
     }
 }
