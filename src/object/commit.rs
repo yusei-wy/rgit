@@ -237,13 +237,19 @@ mod tests {
     }
 
     #[test]
+    fn uesr_to_string() {
+        let u = User::from(b"user <user@test.com> 1609643433 +0900").unwrap();
+        assert_eq!(u.to_string(), "user <user@test.com> 1609643433 +0900");
+    }
+
+    #[test]
     fn commit_from() {
         let oc = Commit::from(b"");
         assert!(oc.is_none());
 
         // first commit
         let cs = vec![
-            "tree 38b38f11af50240a2ddf643619e065408211e9e9",
+            "tree 01a0c85dd05755281466d29983dfcb15889e1a64",
             "author author <author@example.com> 1609642799 +0900",
             "comitter comitter <comitter@example.com> 1609642799 +0900",
             "",
@@ -253,7 +259,7 @@ mod tests {
         let oc = Commit::from(cs.as_bytes());
         assert!(oc.is_some());
         let c = oc.unwrap();
-        assert_eq!(c.tree, "38b38f11af50240a2ddf643619e065408211e9e9");
+        assert_eq!(c.tree, "01a0c85dd05755281466d29983dfcb15889e1a64");
         assert!(c.parent.is_none());
 
         let ts = DateTime::parse_from_rfc3339("2021-01-03T11:59:59+09:00").unwrap();
@@ -273,5 +279,57 @@ mod tests {
         assert_eq!(c.comitter.name, comitter.name);
         assert_eq!(c.comitter.email, comitter.email);
         assert_eq!(c.comitter.ts, comitter.ts);
+
+        let cs = vec![
+            "tree adb7e67378d99ab8125f156442999f187db3d1a3",
+            "parent 01a0c85dd05755281466d29983dfcb15889e1a64",
+            "author author <author@example.com> 1609642799 +0900",
+            "comitter comitter <comitter@example.com> 1609642799 +0900",
+            "",
+            "second commit",
+        ]
+        .join("\n");
+        let oc = Commit::from(cs.as_bytes());
+        assert!(oc.is_some());
+        let c = oc.unwrap();
+        assert_eq!(c.tree, "adb7e67378d99ab8125f156442999f187db3d1a3");
+        assert_eq!(
+            c.parent,
+            Some(String::from("01a0c85dd05755281466d29983dfcb15889e1a64"))
+        );
+    }
+
+    #[test]
+    fn commit_as_bytes() {
+        let cs = vec![
+            "tree adb7e67378d99ab8125f156442999f187db3d1a3",
+            "parent 01a0c85dd05755281466d29983dfcb15889e1a64",
+            "author author <author@example.com> 1609642799 +0900",
+            "comitter comitter <comitter@example.com> 1609642799 +0900",
+            "",
+            "second commit",
+        ]
+        .join("\n");
+        let c = Commit::from(cs.as_bytes()).unwrap();
+
+        let content = format!("{}", c.to_string());
+        let header = format!("commit {}\0", content.len());
+
+        assert_eq!(c.as_bytes(), format!("{}{}", header, content).into_bytes(),);
+    }
+
+    #[test]
+    fn commit_to_string() {
+        let cs = vec![
+            "tree adb7e67378d99ab8125f156442999f187db3d1a3",
+            "parent 01a0c85dd05755281466d29983dfcb15889e1a64",
+            "author author <author@example.com> 1609642799 +0900",
+            "comitter comitter <comitter@example.com> 1609642799 +0900",
+            "",
+            "second commit",
+        ]
+        .join("\n");
+        let c = Commit::from(cs.as_bytes()).unwrap();
+        assert_eq!(c.to_string(), cs + "\n");
     }
 }
