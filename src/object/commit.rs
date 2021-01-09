@@ -1,5 +1,6 @@
 use super::ObjectType;
 use chrono::{DateTime, FixedOffset, TimeZone, Utc};
+use sha1::{Digest, Sha1};
 use std::fmt;
 
 #[derive(Debug)]
@@ -102,6 +103,10 @@ impl Commit {
         let val = format!("{}{}", header, content);
 
         Vec::from(val.as_bytes())
+    }
+
+    pub fn calc_hash(&self) -> Vec<u8> {
+        Vec::from(Sha1::digest(&self.as_bytes()).as_slice())
     }
 }
 

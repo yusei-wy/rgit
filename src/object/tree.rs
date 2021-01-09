@@ -1,6 +1,8 @@
 use super::ObjectType;
 use std::fmt;
 
+use sha1::{Digest, Sha1};
+
 pub struct Tree {
     pub contents: Vec<File>,
 }
@@ -28,6 +30,10 @@ impl Tree {
         let header = format!("{} {}\0", ObjectType::Tree.to_string(), content.len());
 
         [header.as_bytes(), content.as_slice()].concat()
+    }
+
+    pub fn calc_hash(&self) -> Vec<u8> {
+        Vec::from(Sha1::digest(&self.as_bytes()).as_slice())
     }
 }
 
