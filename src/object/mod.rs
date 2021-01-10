@@ -25,7 +25,6 @@ impl GitObject {
             ObjectType::Blob => Blob::from(bytes).map(Self::Blob),
             ObjectType::Tree => Tree::from(bytes).map(Self::Tree),
             ObjectType::Commit => Commit::from(bytes).map(Self::Commit),
-            _ => None,
         }
     }
 
@@ -46,6 +45,7 @@ impl GitObject {
     }
 }
 
+#[derive(Debug, PartialEq)]
 pub enum ObjectType {
     Blob,
     Tree,
@@ -70,5 +70,27 @@ impl ObjectType {
             ObjectType::Tree => String::from("tree"),
             ObjectType::Commit => String::from("commit"),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn object_type_from() {
+        assert_eq!(ObjectType::from(""), None);
+        assert_eq!(ObjectType::from("hoge"), None);
+        assert_eq!(ObjectType::from("123"), None);
+        assert_eq!(ObjectType::from("blob"), Some(ObjectType::Blob));
+        assert_eq!(ObjectType::from("tree"), Some(ObjectType::Tree));
+        assert_eq!(ObjectType::from("commit"), Some(ObjectType::Commit));
+    }
+
+    #[test]
+    fn object_to_string() {
+        assert_eq!(ObjectType::from("blob").unwrap().to_string(), "blob");
+        assert_eq!(ObjectType::from("tree").unwrap().to_string(), "tree");
+        assert_eq!(ObjectType::from("commit").unwrap().to_string(), "commit");
     }
 }
