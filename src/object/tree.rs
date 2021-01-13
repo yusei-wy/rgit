@@ -25,15 +25,15 @@ impl Tree {
         Some(Self { contents })
     }
 
+    pub fn calc_hash(&self) -> Vec<u8> {
+        Vec::from(Sha1::digest(&self.as_bytes()).as_slice())
+    }
+
     pub fn as_bytes(&self) -> Vec<u8> {
         let content: Vec<u8> = self.contents.iter().flat_map(|x| x.encode()).collect();
         let header = format!("{} {}\0", ObjectType::Tree.to_string(), content.len());
 
         [header.as_bytes(), content.as_slice()].concat()
-    }
-
-    pub fn calc_hash(&self) -> Vec<u8> {
-        Vec::from(Sha1::digest(&self.as_bytes()).as_slice())
     }
 }
 

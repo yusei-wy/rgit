@@ -97,16 +97,16 @@ impl Commit {
         ))
     }
 
+    pub fn calc_hash(&self) -> Vec<u8> {
+        Vec::from(Sha1::digest(&self.as_bytes()).as_slice())
+    }
+
     pub fn as_bytes(&self) -> Vec<u8> {
         let content = format!("{}", self);
         let header = format!("{} {}\0", ObjectType::Commit.to_string(), content.len());
         let val = format!("{}{}", header, content);
 
         Vec::from(val.as_bytes())
-    }
-
-    pub fn calc_hash(&self) -> Vec<u8> {
-        Vec::from(Sha1::digest(&self.as_bytes()).as_slice())
     }
 }
 

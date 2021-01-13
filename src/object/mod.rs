@@ -76,6 +76,7 @@ impl ObjectType {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use sha1::{Digest, Sha1};
 
     #[test]
     fn object_type_from() {
@@ -92,5 +93,76 @@ mod tests {
         assert_eq!(ObjectType::from("blob").unwrap().to_string(), "blob");
         assert_eq!(ObjectType::from("tree").unwrap().to_string(), "tree");
         assert_eq!(ObjectType::from("commit").unwrap().to_string(), "commit");
+    }
+
+    #[test]
+    fn git_object_new() {
+        assert!(GitObject::new(b"").is_none());
+        assert!(GitObject::new(b"hoge").is_none());
+        assert!(GitObject::new(b"123").is_none());
+        assert!(GitObject::new(b"blob").is_some());
+        assert!(GitObject::new(b"tree").is_some());
+        assert!(GitObject::new(b"commit").is_none()); // commit はこれだけだと from で None になる
+        let (g, _) = new_commit_git_object();
+        assert!(g.is_some());
+    }
+
+    #[test]
+    fn git_object_as_bytes() {
+        assert_eq!(
+            GitObject::new(b"blob").unwrap().as_bytes(),
+            format!("blob 4\0blob").as_bytes()
+        );
+        assert_eq!(
+            GitObject::new(b"tree").unwrap().as_bytes(),
+            format!("tree 0\0").as_bytes()
+        );
+
+        let (g, expected) = new_commit_git_object();
+        assert_eq!(
+            g.unwrap().as_bytes(),
+            format!("commit {}\0{}\n", expected.len() + 1, expected).as_bytes(),
+        );
+    }
+
+    #[test]
+    fn git_object_calc_hash() {
+        assert_eq!(
+            GitObject::new(b"blob").unwrap().calc_hash(),
+            calc_hash(format!("blob 4\0blob").as_bytes())
+        );
+        assert_eq!(
+            GitObject::new(b"tree").unwrap().calc_hash(),
+            calc_hash(format!("tree 0\0").as_bytes())
+        );
+
+        let (g, expected) = new_commit_git_object();
+        assert_eq!(
+            g.unwrap().calc_hash(),
+            calc_hash(format!("commit {}\0{}\n", expected.len() + 1, expected).as_bytes()),
+        );
+    }
+
+    fn new_commit_git_object() -> (Option<GitObject>, String) {
+        let cs = vec![
+            "tree adb7e67378d99ab8125f156442999f187db3d1a3",
+            "parent 01a0c85dd05755281466d29983dfcb15889e1a64",
+            "author author <author@example.com> 1609642799 +0900",
+            "comitter comitter <comitter@example.com> 1609642799 +0900",
+            "",
+            "second commit",
+        ]
+        .join("\n")
+        .trim_end()
+        .to_owned();
+        let expected = format!("tree {}", cs.clone());
+        (
+            GitObject::new(format!("commit {}", cs.clone()).as_bytes()),
+            expected,
+        )
+    }
+
+    fn calc_hash(bytes: &[u8]) -> Vec<u8> {
+        Vec::from(Sha1::digest(bytes).as_slice())
     }
 }
