@@ -1,3 +1,5 @@
+use std::fmt;
+
 pub mod blob;
 pub mod commit;
 pub mod tree;
@@ -41,6 +43,16 @@ impl GitObject {
             Self::Blob(obj) => obj.as_bytes(),
             Self::Tree(obj) => obj.as_bytes(),
             Self::Commit(obj) => obj.as_bytes(),
+        }
+    }
+}
+
+impl fmt::Display for GitObject {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Self::Blob(obj) => obj.fmt(f),
+            Self::Tree(obj) => obj.fmt(f),
+            Self::Commit(obj) => obj.fmt(f),
         }
     }
 }
