@@ -76,6 +76,32 @@ pub struct Entry {
 }
 
 impl Entry {
+    pub fn new(
+        c_time: DateTime<Utc>,
+        m_time: DateTime<Utc>,
+        dev: u32,
+        inode: u32,
+        mode: u32,
+        uid: u32,
+        gid: u32,
+        size: u32,
+        hash: Vec<u8>,
+        name: String,
+    ) -> Self {
+        Self {
+            c_time,
+            m_time,
+            dev,
+            inode,
+            mode,
+            uid,
+            gid,
+            size,
+            hash,
+            name,
+        }
+    }
+
     pub fn from(bytes: &[u8]) -> Option<Self> {
         let c_time = hex_to_num(&bytes[0..4]);
         let c_time_nano = hex_to_num(&bytes[4..8]);
