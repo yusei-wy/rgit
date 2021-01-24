@@ -129,7 +129,7 @@ impl fmt::Display for Commit {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct User {
     pub name: String,
     pub email: String,

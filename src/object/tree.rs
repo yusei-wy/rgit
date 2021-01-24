@@ -8,6 +8,10 @@ pub struct Tree {
 }
 
 impl Tree {
+    pub fn new(contents: Vec<File>) -> Self {
+        Self { contents }
+    }
+
     pub fn from(bytes: &[u8]) -> Option<Self> {
         let contents: Vec<File> = Vec::new();
         let mut iter = bytes.split(|&b| b == b'\0'); // 各 Entry は '\0' 区切り
