@@ -28,7 +28,7 @@ pub fn hash_object(path: String) -> io::Result<Blob> {
     Blob::from(&buf).ok_or(io::Error::from(io::ErrorKind::InvalidData))
 }
 
-pub fn add(git: Git, filename: String) -> io::Result<()> {
+pub fn add(git: &Git, filename: String) -> io::Result<()> {
     let path = env::current_dir().map(|x| x.join(&filename))?;
     let mut file = File::open(path)?;
     let mut bytes = Vec::new();
@@ -74,18 +74,35 @@ mod tests {
         assert!(hash_object(String::from("")).is_err());
         assert!(hash_object(String::from("hoge123...;;;")).is_err());
 
-        let testfile = String::from("hash_object_test.txt");
+        let (testfile, hash) = create_test_file();
 
-        // test file
+        let blob = hash_object(testfile).unwrap();
+        assert_eq!(hex::encode(blob.calc_hash()), hash,);
+    }
+
+    // #[test]
+    // fn cmd_add() {
+    //     let (testfile, _) = create_test_file();
+    //     let git = Git::new();
+    //     assert!(add(&git, testfile).is_ok());
+
+    //     let index = git
+    //         .read_index()
+    //         .and_then(|x| git.ls_files_stage(&x))
+    //         .unwrap();
+    // }
+
+    // return (filename, hash)
+    fn create_test_file() -> (String, String) {
+        let testfile = String::from("hash_object_test.txt");
         let mut file = File::create(testfile.clone()).unwrap();
         let mut buf = "hello, git".as_bytes();
         file.write_all(&mut buf).unwrap();
         file.flush().unwrap();
 
-        let blob = hash_object(testfile).unwrap();
-        assert_eq!(
-            hex::encode(blob.calc_hash()),
-            "3edbc45b9a7f744c2345cd2cd073c3de091341ac"
-        );
+        (
+            testfile,
+            String::from("3edbc45b9a7f744c2345cd2cd073c3de091341ac"),
+        )
     }
 }

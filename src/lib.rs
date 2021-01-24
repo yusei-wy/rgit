@@ -42,7 +42,8 @@ impl Git {
 
         let path = path.join(file);
 
-        let encoder = Encoder::new(Vec::new())?;
+        let mut encoder = Encoder::new(Vec::new())?;
+        encoder.write_all(&object.as_bytes())?;
         let bytes = encoder.finish().into_result()?;
 
         let mut file = File::create(path)?;
@@ -65,7 +66,7 @@ impl Git {
     }
 
     pub fn hash_object(&self, bytes: &[u8]) -> io::Result<Blob> {
-        let blob = Blob::from(&bytes).ok_or(io::Error::from(io::ErrorKind::InvalidData))?;
+        let blob = Blob::from(&bytes).ok_or(io::Error::from(io::ErrorKind::InvalidInput))?;
         Ok(blob)
     }
 
