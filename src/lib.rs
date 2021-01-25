@@ -168,7 +168,7 @@ impl Git {
 
     fn write_ref(&self, path: PathBuf, hash: &[u8]) -> io::Result<()> {
         let path = env::current_dir().map(|x| x.join(".git").join(path))?;
-        let mut file = File::open(path)?;
+        let mut file = File::create(path)?;
         file.write_all(hex::encode(hash).as_bytes())?;
         file.flush()?;
 
