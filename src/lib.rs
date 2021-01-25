@@ -29,7 +29,7 @@ impl Git {
         Ok(bytes)
     }
 
-    fn write_object(object: &GitObject) -> io::Result<()> {
+    pub fn write_object(&self, object: &GitObject) -> io::Result<()> {
         let hash = hex::encode(object.calc_hash());
         let (sub_dir, file) = hash.split_at(2);
 
@@ -157,9 +157,22 @@ impl Git {
         let path = env::current_dir().map(|x| x.join(".git").join(path))?;
         let mut file = File::open(path)?;
         let mut hash = String::new();
-        file.read_to_string(&mut hash);
+        file.read_to_string(&mut hash)?;
 
         Ok(hash.trim().to_string())
+    }
+
+    pub fn update_ref(&self, path: PathBuf, hash: &[u8]) -> io::Result<()> {
+        self.write_ref(path, hash)
+    }
+
+    fn write_ref(&self, path: PathBuf, hash: &[u8]) -> io::Result<()> {
+        let path = env::current_dir().map(|x| x.join(".git").join(path))?;
+        let mut file = File::open(path)?;
+        file.write_all(hex::encode(hash).as_bytes())?;
+        file.flush()?;
+
+        Ok(())
     }
 }
 

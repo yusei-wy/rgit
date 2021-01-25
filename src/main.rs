@@ -18,6 +18,7 @@ fn main() -> io::Result<()> {
             Ok(())
         }
         "add" => cmd::add(&git, args.get(2).unwrap().clone()),
+        "commit" => cmd::commit(&git, args.get(2).unwrap().clone()),
         _ => {
             eprintln!("unexpected command: {}", sub_cmd.as_str());
             Ok(())

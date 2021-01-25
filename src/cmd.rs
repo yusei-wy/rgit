@@ -36,11 +36,31 @@ pub fn add(git: &Git, filename: String) -> io::Result<()> {
 
     // git hash-object -w path
     let blob = git.hash_object(&bytes).map(GitObject::Blob)?;
-    Git::write_object(&blob)?;
+    git.write_object(&blob)?;
 
     // git update-index --add --cacheinfo <mode> <hash> <name>
     let index = git.update_index(&blob.calc_hash(), filename)?;
     git.write_index(&index)?;
+
+    Ok(())
+}
+
+pub fn commit(git: &Git, message: String) -> io::Result<()> {
+    let tree = git.write_tree().map(GitObject::Tree)?;
+    git.write_object(&tree)?;
+
+    let tree_hash = tree.calc_hash();
+    let commit = git
+        .commit_tree(
+            "yusei-wy".to_string(), // gitconfig からの読み取りが大変なので固定値
+            "yusei.kasa@gmail.com".to_string(),
+            hex::encode(tree_hash),
+            message,
+        )
+        .map(GitObject::Commit)?;
+    git.write_object(&commit)?;
+
+    git.update_ref(git.head_ref()?, &commit.calc_hash())?;
 
     Ok(())
 }
