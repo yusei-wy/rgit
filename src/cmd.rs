@@ -1,7 +1,10 @@
-use crate::object::{Blob, GitObject};
-use crate::Git;
 use libflate::zlib::Decoder;
-use std::env;
+
+use crate::Git;
+use crate::{
+    fs::FileSystem,
+    object::{Blob, GitObject},
+};
 use std::fs::File;
 use std::io::{self, Read};
 
@@ -28,24 +31,20 @@ pub fn hash_object(path: String) -> io::Result<Blob> {
     Blob::from(&buf).ok_or(io::Error::from(io::ErrorKind::InvalidData))
 }
 
-pub fn add(git: &Git, filename: String) -> io::Result<()> {
-    let path = env::current_dir().map(|x| x.join(&filename))?;
-    let mut file = File::open(path)?;
-    let mut bytes = Vec::new();
-    file.read_to_end(&mut bytes)?;
-
+pub fn add<F: FileSystem>(git: &mut Git<F>, filename: String, bytes: &[u8]) -> io::Result<()> {
     // git hash-object -w path
     let blob = git.hash_object(&bytes).map(GitObject::Blob)?;
     git.write_object(&blob)?;
 
     // git update-index --add --cacheinfo <mode> <hash> <name>
-    let index = git.update_index(&blob.calc_hash(), filename)?;
+    let index = git.read_index().and_then(|x| git.ls_files_stage(&x))?;
+    let index = git.update_index(index, &blob.calc_hash(), filename)?;
     git.write_index(&index)?;
 
     Ok(())
 }
 
-pub fn commit(git: &Git, message: String) -> io::Result<()> {
+pub fn commit<F: FileSystem>(git: &mut Git<F>, message: String) -> io::Result<()> {
     let tree = git.write_tree().map(GitObject::Tree)?;
     git.write_object(&tree)?;
 
@@ -76,18 +75,18 @@ mod tests {
         assert!(cat_file_p(String::from("")).is_err());
     }
 
-    #[test]
-    fn cmd_cat_file_p() {
-        // file not found
-        assert!(cat_file_p(String::from("hoge123...;;;")).is_err());
+    // #[test]
+    // fn cmd_cat_file_p() {
+    //     // file not found
+    //     assert!(cat_file_p(String::from("hoge123...;;;")).is_err());
 
-        // first commit
-        let r = cat_file_p(String::from("01a0c85dd05755281466d29983dfcb15889e1a64"));
-        assert!(r.is_ok());
-        let r = r.ok().unwrap();
-        let expected = "tree 179\u{0}tree 38b38f11af50240a2ddf643619e065408211e9e9\nauthor yusei-wy <yusei.kasa@gmail.com> 1609642799 +0900\ncomitter yusei-wy <yusei.kasa@gmail.com> 1609642799 +0900\n\nadd: blob object\n";
-        assert_eq!(r.to_string(), expected);
-    }
+    //     // first commit
+    //     let r = cat_file_p(String::from("01a0c85dd05755281466d29983dfcb15889e1a64"));
+    //     assert!(r.is_ok());
+    //     let r = r.ok().unwrap();
+    //     let expected = "tree 179\u{0}tree 38b38f11af50240a2ddf643619e065408211e9e9\nauthor yusei-wy <yusei.kasa@gmail.com> 1609642799 +0900\ncomitter yusei-wy <yusei.kasa@gmail.com> 1609642799 +0900\n\nadd: blob object\n";
+    //     assert_eq!(r.to_string(), expected);
+    // }
 
     #[test]
     fn cmd_hash_object() {
