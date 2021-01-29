@@ -54,7 +54,7 @@ impl FileSystem for LinuxFileSystem {
         })
     }
 
-    fn create_dir(&self, path: String) -> io::Result<()> {
+    fn create_dir(&mut self, path: String) -> io::Result<()> {
         let path = self.root.join(path);
         fs::create_dir_all(path)
     }
