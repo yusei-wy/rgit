@@ -1,7 +1,10 @@
 use super::ObjectType;
+#[cfg(feature = "json")]
+use serde::Serialize;
 use sha1::{Digest, Sha1};
 use std::fmt;
 
+#[cfg_attr(feature = "json", derive("Seriaze"))]
 pub struct Blob {
     pub size: usize,
     pub content: String,

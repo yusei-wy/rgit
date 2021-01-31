@@ -7,9 +7,10 @@ use crate::index::{Entry, Index};
 use chrono::{Local, TimeZone, Utc};
 use fs::FileSystem;
 use libflate::zlib::{Decoder, Encoder};
-use object::{blob::Blob, Tree};
-use object::{commit, GitObject};
-use object::{tree, Commit};
+use object::blob::Blob;
+use object::commit::{self, Commit};
+use object::tree::{self, Tree};
+use object::GitObject;
 use std::io::{self, Read, Write};
 
 pub struct Git<F: FileSystem> {

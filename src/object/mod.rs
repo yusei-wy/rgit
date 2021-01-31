@@ -1,13 +1,17 @@
-use std::fmt;
-
 pub mod blob;
 pub mod commit;
 pub mod tree;
 
-pub use blob::Blob;
-pub use commit::Commit;
-pub use tree::Tree;
+use blob::Blob;
+use commit::Commit;
+#[cfg(feature = "json")]
+use serde::ser::{Serialize, SerializeStruct, Serializer};
+use std::error::Error;
+use std::fmt;
+use std::result::Result;
+use tree::Tree;
 
+#[cfg_attr(feature = "json", derive(Serialize))]
 pub enum GitObject {
     Blob(Blob),
     Tree(Tree),
@@ -44,6 +48,23 @@ impl GitObject {
             Self::Tree(obj) => obj.as_bytes(),
             Self::Commit(obj) => obj.as_bytes(),
         }
+    }
+}
+
+#[cfg(feature = "json")]
+impl Serialize for GitObject {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut s = serializer.serialize_struct("GitObject", 2)?;
+        match self {
+            GitObject::Blob(blob) => s.serialize_field("Blob", blob)?,
+            GitObject::Tree(tree) => s.serialize_field("Tree", tree)?,
+            GitObject::Commit(commit) => s.serialize_field("Commit", commit)?,
+        }
+        s.serialize_field("hash", &hex::encode(self.cacl_hash()))?;
+        s.end()
     }
 }
 

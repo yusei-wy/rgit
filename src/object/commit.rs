@@ -1,8 +1,11 @@
 use super::ObjectType;
 use chrono::{DateTime, FixedOffset, TimeZone, Utc};
+#[cfg(feature = "json")]
+use serde::Serialize;
 use sha1::{Digest, Sha1};
 use std::fmt;
 
+#[cfg_attr(feature = "json", derive("Seriaze"))]
 #[derive(Debug)]
 pub struct Commit {
     pub tree: String,

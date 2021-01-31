@@ -1,10 +1,7 @@
 use libflate::zlib::Decoder;
 
 use crate::Git;
-use crate::{
-    fs::FileSystem,
-    object::{Blob, GitObject},
-};
+use crate::{fs::FileSystem, object::blob::Blob, object::GitObject};
 use std::fs::File;
 use std::io::{self, Read};
 

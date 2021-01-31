@@ -1,8 +1,10 @@
 use super::ObjectType;
+#[cfg(feature = "json")]
+use serde::Serialize;
+use sha1::{Digest, Sha1};
 use std::fmt;
 
-use sha1::{Digest, Sha1};
-
+#[cfg_attr(feature = "json", derive("Seriaze"))]
 pub struct Tree {
     pub contents: Vec<File>,
 }
