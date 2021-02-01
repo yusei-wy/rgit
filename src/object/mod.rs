@@ -11,7 +11,6 @@ use std::fmt;
 use std::result::Result;
 use tree::Tree;
 
-#[cfg_attr(feature = "json", derive(Serialize))]
 pub enum GitObject {
     Blob(Blob),
     Tree(Tree),
@@ -63,7 +62,7 @@ impl Serialize for GitObject {
             GitObject::Tree(tree) => s.serialize_field("Tree", tree)?,
             GitObject::Commit(commit) => s.serialize_field("Commit", commit)?,
         }
-        s.serialize_field("hash", &hex::encode(self.cacl_hash()))?;
+        s.serialize_field("hash", &hex::encode(self.calc_hash()))?;
         s.end()
     }
 }
