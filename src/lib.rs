@@ -73,7 +73,12 @@ impl<F: FileSystem> Git<F> {
         Ok(blob)
     }
 
-    pub fn update_index(&self, idx: Index, hash: &[u8], filename: String) -> io::Result<Index> {
+    pub fn update_index(&self, hash: &[u8], filename: String) -> io::Result<Index> {
+        let bytes = self
+            .read_index()
+            .unwrap_or([*b"DIRC", 0x0002u32.to_be_bytes(), 0x0000u32.to_be_bytes()].concat());
+        let index = self.ls_files_stage(&bytes)?;
+
         let metadata = self.filesystem.stat(filename.clone())?;
         let entry = Entry::new(
             Utc.timestamp(metadata.ctime as i64, metadata.ctime_nsec),
@@ -88,7 +93,7 @@ impl<F: FileSystem> Git<F> {
             filename.clone(),
         );
 
-        let mut entries: Vec<Entry> = idx
+        let mut entries: Vec<Entry> = index
             .entries
             .into_iter()
             // ファイル名が同じまたは hash 値が同じ場合, 同一ファイルなので取り除く

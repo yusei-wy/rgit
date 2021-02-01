@@ -35,7 +35,7 @@ pub fn add<F: FileSystem>(git: &mut Git<F>, filename: String, bytes: &[u8]) -> i
 
     // git update-index --add --cacheinfo <mode> <hash> <name>
     let index = git.read_index().and_then(|x| git.ls_files_stage(&x))?;
-    let index = git.update_index(index, &blob.calc_hash(), filename)?;
+    let index = git.update_index(&blob.calc_hash(), filename)?;
     git.write_index(&index)?;
 
     Ok(())
