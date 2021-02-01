@@ -4,7 +4,7 @@ use serde::Serialize;
 use sha1::{Digest, Sha1};
 use std::fmt;
 
-#[cfg_attr(feature = "json", derive("Seriaze"))]
+#[cfg_attr(feature = "json", derive(Serialize))]
 pub struct Tree {
     pub contents: Vec<File>,
 }

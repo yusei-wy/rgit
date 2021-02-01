@@ -5,7 +5,7 @@ use serde::Serialize;
 use sha1::{Digest, Sha1};
 use std::fmt;
 
-#[cfg_attr(feature = "json", derive("Seriaze"))]
+#[cfg_attr(feature = "json", derive(Serialize))]
 #[derive(Debug)]
 pub struct Commit {
     pub tree: String,
