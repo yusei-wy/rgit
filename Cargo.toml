@@ -1,6 +1,6 @@
 [package]
 name = "rgit"
-version = "0.1.2"
+version = "0.1.3"
 authors = ["yusei-wy <yusei.kasa@gmail.com>"]
 edition = "2018"
 
