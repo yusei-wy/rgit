@@ -133,7 +133,7 @@ impl<F: FileSystem> Git<F> {
     }
 
     // .git/HEAD に書かれた ref を参照する
-    fn head_ref(&self) -> io::Result<String> {
+    pub fn head_ref(&self) -> io::Result<String> {
         let path = ".git/HEAD".to_string();
         let file = self.filesystem.read(path)?;
         let refs =
