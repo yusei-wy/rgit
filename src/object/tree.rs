@@ -57,6 +57,7 @@ impl fmt::Display for Tree {
     }
 }
 
+#[cfg_attr(feature = "json", derive(Serialize))]
 pub struct File {
     pub mode: usize,
     pub name: String,

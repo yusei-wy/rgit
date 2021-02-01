@@ -132,6 +132,7 @@ impl fmt::Display for Commit {
     }
 }
 
+#[cfg_attr(feature = "json", derive(Serialize))]
 #[derive(Clone, Debug)]
 pub struct User {
     pub name: String,
