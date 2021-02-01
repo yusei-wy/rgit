@@ -150,7 +150,7 @@ impl<F: FileSystem> Git<F> {
         Ok(path.trim().to_string())
     }
 
-    fn read_ref(&self, path: String) -> io::Result<String> {
+    pub fn read_ref(&self, path: String) -> io::Result<String> {
         let path = format!(".git/{}", path);
         let file = self.filesystem.read(path)?;
         let hash =
