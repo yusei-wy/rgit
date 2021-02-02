@@ -137,7 +137,6 @@ impl<F: FileSystem> Git<F> {
         Ok(commit)
     }
 
-    // .git/HEAD に書かれた ref を参照する
     pub fn head_ref(&self) -> io::Result<String> {
         let path = ".git/HEAD".to_string();
         let file = self.filesystem.read(path)?;

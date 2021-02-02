@@ -1,4 +1,8 @@
 use super::{FileSystem, Metadata};
+#[cfg(feature = "json")]
+use serde::ser::SerializeMap;
+#[cfg(feature = "json")]
+use serde::{Serialize, Serializer};
 use std::collections::HashMap;
 use std::io;
 
@@ -66,6 +70,7 @@ impl Entity {
     }
 }
 
+#[cfg_attr(feature = "json", derive(Serialize))]
 pub struct InMemFileSystem {
     root: Entity,
 }
