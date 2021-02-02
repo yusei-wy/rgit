@@ -70,6 +70,25 @@ impl Entity {
     }
 }
 
+#[cfg(feature = "json")]
+impl Serialize for Entity {
+    fn serialie<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        match self {
+            Self::Dir(dir) => {
+                let mut s = serializer.serialize_map(Some(dir.len()));
+                for (k, v) in dir {
+                    s.serialize_entry(k, v)?;
+                }
+                s.end()
+            }
+            Self::File(file) => serializer.serialize_bytes(file),
+        }
+    }
+}
+
 #[cfg_attr(feature = "json", derive(Serialize))]
 pub struct InMemFileSystem {
     root: Entity,
