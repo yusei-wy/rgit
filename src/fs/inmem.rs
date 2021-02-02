@@ -72,7 +72,7 @@ impl Entity {
 
 #[cfg(feature = "json")]
 impl Serialize for Entity {
-    fn serialie<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
