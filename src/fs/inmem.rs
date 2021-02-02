@@ -78,7 +78,7 @@ impl Serialize for Entity {
     {
         match self {
             Self::Dir(dir) => {
-                let mut s = serializer.serialize_map(Some(dir.len()));
+                let mut s = serializer.serialize_map(Some(dir.len()))?;
                 for (k, v) in dir {
                     s.serialize_entry(k, v)?;
                 }
