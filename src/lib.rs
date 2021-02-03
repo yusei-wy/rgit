@@ -49,7 +49,7 @@ impl<F: FileSystem> Git<F> {
         let hash = hex::encode(object.calc_hash());
         let (sub_dir, file) = hash.split_at(2);
 
-        let path = format!(".git/objects{}", sub_dir);
+        let path = format!(".git/objects/{}", sub_dir);
         // ディレクトがなければ
         if let Err(_) = self.filesystem.stat(path.clone()) {
             self.filesystem.create_dir(path.clone())?;

@@ -14,17 +14,17 @@ enum Entity {
 impl Entity {
     pub fn change_dir(&self, path: String) -> io::Result<&Entity> {
         path.split("/").try_fold(self, |st, x| match st {
-            Self::File(_) => Err(io::Error::from(io::ErrorKind::NotFound)),
             Self::Dir(dir) => dir.get(x).ok_or(io::Error::from(io::ErrorKind::NotFound)),
+            Self::File(_) => Err(io::Error::from(io::ErrorKind::NotFound)),
         })
     }
 
     pub fn change_dir_mut(&mut self, path: String) -> io::Result<&mut Entity> {
         path.split("/").try_fold(self, |st, x| match st {
-            Self::File(_) => Err(io::Error::from(io::ErrorKind::NotFound)),
             Self::Dir(dir) => dir
                 .get_mut(x)
                 .ok_or(io::Error::from(io::ErrorKind::NotFound)),
+            Self::File(_) => Err(io::Error::from(io::ErrorKind::NotFound)),
         })
     }
 
